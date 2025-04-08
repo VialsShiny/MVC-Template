@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Home{% endblock %}</title>
+  <link rel="shortcut icon" href="{% block favicon %}/public/img/favicon.ico{% endblock %}" type="image/x-icon">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    @keyframes gradient-flow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .animated-gradient {
+      background: linear-gradient(-45deg, #35259b, #be3c7d, #5bbfe0, #6809c0);
+      background-size: 400% 400%;
+      animation: gradient-flow 15s ease infinite;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen animated-gradient flex items-center justify-center p-4">
+  {% block app %}
+  {% endblock %}
+</body>
+
+
+</html>
