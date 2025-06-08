@@ -5,12 +5,14 @@ namespace App\Router;
 /**
  * Router Template.
  *
- * Note: This is a template and can be customized for your needs.
+ * This class is responsible for routing incoming requests to the appropriate controller and action.
  */
 class Router
 {
+    // Define the routes mapping request URIs to controller actions.
     private $routes = [
         '/' => "HomeController@index",
+        '/chambre/{id}' => "RoomController@reservation", // Route for room reservation (example)
     ];
 
     /**
@@ -20,30 +22,25 @@ class Router
      */
     public function dispatch($request_uri)
     {
-        if (!preg_match("/^\/chambre\/\d+$/", $request_uri)) {
-            if (!array_key_exists($request_uri, $this->routes)) {
-                http_response_code(404);
-                include './src/views/errors/page404.php';
-                exit;
+        // Check if the request URI matches any defined routes
+        foreach ($this->routes as $route => $action) {
+            $pattern = preg_replace('/\{(\w+)\}/', '(\d+)', preg_quote($route, '/'));
+            if (preg_match("/^$pattern$/", $request_uri, $matches)) {
+                list($controller, $action) = explode('@', $action);
+                array_shift($matches);
+                $params = $matches;
+                break;
             }
-            list($controller, $action) = explode('@', $this->routes[$request_uri]);
         }
 
-        $segment1 = "";
-        /**
-         * If the request URI matches '/chambre/{id}', set the controller to RoomController,
-         * the action to 'reservation', and extract the room ID.
-         *
-         * @param string $request_uri The incoming request URI.
-         */
-        if (preg_match("/^\/chambre\/\d+$/", $request_uri)) {
-            $controller = 'RoomController';
-            $action = 'reservation';
-            $uriSegments = explode('/', $request_uri);
-            $segment1 = $uriSegments[2];
+        // If no matching route was found, return a 404 error
+        if (!isset($controller)) {
+            http_response_code(404);
+            include './src/views/errors/page404.php';
+            exit;
         }
 
-
+        // Construct the path to the controller file
         $directory = '/controllers/' . $controller . '.php';
         if (!file_exists(__DIR__ . "../../$directory")) {
             http_response_code(500);
@@ -51,6 +48,7 @@ class Router
             exit;
         }
 
+        // Check if the controller class exists
         $controllerClass = "App\\Controllers\\$controller";
         if (!class_exists($controllerClass)) {
             http_response_code(500);
@@ -58,7 +56,10 @@ class Router
             exit;
         }
 
+        // Create an instance of the controller
         $controllerInstance = new $controllerClass();
-        echo $segment1 ? $controllerInstance->$action($segment1) : $controllerInstance->$action();
+        
+        // Call the action method with parameters if available
+        echo $params ? $controllerInstance->$action(...$params) : $controllerInstance->$action();
     }
 }
