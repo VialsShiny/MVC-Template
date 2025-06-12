@@ -24,8 +24,9 @@ class Router
     {
         // Check if the request URI matches any defined routes
         foreach ($this->routes as $route => $action) {
-            $pattern = preg_replace('/\{(\w+)\}/', '(\d+)', preg_quote($route, '/'));
-            if (preg_match("/^$pattern$/", $request_uri, $matches)) {
+            $pattern = preg_replace('/\{(\w+)\}/', '(\d+)', $route);
+            $pattern = "#^" . $pattern . "$#";
+            if (preg_match($pattern, $request_uri, $matches)) {
                 list($controller, $action) = explode('@', $action);
                 array_shift($matches);
                 $params = $matches;
@@ -58,7 +59,7 @@ class Router
 
         // Create an instance of the controller
         $controllerInstance = new $controllerClass();
-        
+
         // Call the action method with parameters if available
         echo $params ? $controllerInstance->$action(...$params) : $controllerInstance->$action();
     }
